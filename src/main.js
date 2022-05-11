@@ -13,11 +13,12 @@
 // SCENE HANDLING                //
 // //// //// //// //// //// //// //
 
-const SCENES = {
+const SCENES = { // everytime you make a new scene, you need to put it into this dictionary.
     "Play" : new scenePlay,
+    "Menu": new sceneMenu,
 };
 
-let currentScene = "Play";
+let currentScene = "Menu";
 let flagHasRunInit = false;
 
 function setup() {
