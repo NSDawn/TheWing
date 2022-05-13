@@ -25,18 +25,11 @@ class sceneMenu {
             UI_CONFIG.DARK_COLOR,
         );
         
+        if (keyJustTyped == "x") {
+            changeScene("Play");
+        }
+        
         return;
     }
 }
 
-function keyTyped() {
-    if (key === 'x') {
-        if (currentScene == "Play") {
-            changeScene("Menu");
-        } else if (currentScene == "Menu") {
-            changeScene("Play")
-        }
-        return 1;
-    }
-    return 0;
-}

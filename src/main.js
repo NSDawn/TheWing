@@ -41,6 +41,9 @@ function draw() {
     }
     // runs sceneDraw once per frame
     SCENES[currentScene].sceneDraw();
+    
+    // see KEY HANDLING
+    keyJustTyped = "";
 }
 
 function changeScene(sceneKey) {
@@ -51,3 +54,14 @@ function changeScene(sceneKey) {
     flagHasRunInit = true;
     return;
 }
+
+// //// //// //// //// //// //// //
+// KEY HANDLING                  //
+// //// //// //// //// //// //// //
+
+let keyJustTyped = "" // this is set to "" at the end of each frame
+
+function keyTyped() {
+    keyJustTyped = key;
+}
+
