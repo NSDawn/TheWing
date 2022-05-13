@@ -9,6 +9,7 @@
 
 */
 
+
 // //// //// //// //// //// //// //
 // SCENE HANDLING                //
 // //// //// //// //// //// //// //
@@ -20,6 +21,7 @@ const SCENES = { // everytime you make a new scene, you need to put it into this
 
 let currentScene = "Menu";
 let flagHasRunInit = false;
+let FONT;
 
 function setup() {
     // setup runs once for the entire program
@@ -31,6 +33,9 @@ function preload() {
     for (s in SCENES) {
         SCENES[s].scenePreload();
     }
+
+    FONT = loadFont("./assets/fonts/Montserrat.ttf"); // the font!
+
 }
 
 function draw() {

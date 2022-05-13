@@ -8,6 +8,7 @@ const UI = {
     DARK_COLOR: '#2C2F33',
     VDARK_COLOR: '#23272A',
     
-    BUFF: CANVAS_SIZE.x/30,
+    BUFF: CANVAS_SIZE.x/60,
+    TEXTSIZE: CANVAS_SIZE.x/40,
 
 };
