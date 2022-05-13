@@ -11,19 +11,15 @@ class scenePlay {
         return;
     }
     sceneDraw() { // runs once per ∆t
-        background(UI_CONFIG.DARK_COLOR);
+        // settings
+        background(UI.DARK_COLOR);
+        noStroke();
 
-        textSize(CANVAS_SIZE.x/12); text(
-            "holey shoot it's the game.", 
-            CANVAS_SIZE.x/20, CANVAS_SIZE.y/2, 
-            UI_CONFIG.DARK_COLOR,
-        );
-        textSize(CANVAS_SIZE.x/20); text(
-            "whee what a nice game \nclick x to change scene lmao.", 
-            CANVAS_SIZE.x/16, CANVAS_SIZE.y/2 + CANVAS_SIZE.x/8, 
-            UI_CONFIG.DARK_COLOR,
-        );
+        // screen items
+        fill(UI.VDARK_COLOR); rect(0, 0, CANVAS_SIZE.x / 8, CANVAS_SIZE.y); // left sidebar
 
+        fill(UI.LIGHT_COLOR); rect(CANVAS_SIZE.x / 8, 7 * CANVAS_SIZE.y / 8, 7* CANVAS_SIZE.x /8, CANVAS_SIZE.y /8);
+        //fill(UI.VLIGHT_COLOR); rect(CANVAS_SIZE.x / 8 +UI.BUFF, 7 * CANVAS_SIZE.y / 8 +UI.BUFF, 7* CANVAS_SIZE.x /8 -UI.BUFF, CANVAS_SIZE.y /8 -UI.BUFF);
         return;
     }
 }
