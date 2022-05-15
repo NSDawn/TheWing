@@ -35,6 +35,10 @@ function preload() {
 
     FONT = loadFont("./assets/fonts/Montserrat.ttf"); // the font!
 
+    IMG = {}
+    for (let i = 0; i < IMG_LIST.length; i++) { // preloading all images at once
+        IMG[IMG_LIST[i]] = loadImage("./assets/images/" + IMG_LIST[i]);
+    }
 }
 
 function draw() {

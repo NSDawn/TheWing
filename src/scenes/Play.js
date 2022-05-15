@@ -1,7 +1,9 @@
 // VAR DECLARATION
+let selectedUser = ""; selectedUser = "testUser"
 let currentSlice = [];
 let currentLineNum = 0; let currentLine = "..."; let currentLineTyped = "";
 let typeTick = 0; // referenced for the | thing.
+let scrollOffset = 0; let maxScroll = 0;
 
 // SCENE (scenePlay)
 class scenePlay {
@@ -17,7 +19,7 @@ class scenePlay {
         // settings
         background(UI.DARK_COLOR);
         noStroke();
-        textFont("Arial");// textFont(FONT);
+        textFont("Arial");// textFont(FONT); // font change later pls.
 
         // SCREEN ITEMS
 
@@ -57,14 +59,64 @@ class scenePlay {
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
         )
 
+        let yOffset = 0;
+        let minRep = 2; // offset by at least 2 lines between users (bc of PFP)
+        for (let i = 0; i < save.msg[selectedUser].length; i++) {
+            
+            let isSameUser = false
+            if (i != 0) {
+                if (save.msg[selectedUser][i][0] == save.msg[selectedUser][i - 1][0]) {
+                    isSameUser = true;
+                }
+            }
+
+            if (isSameUser) {
+                yOffset += UI.TEXTSIZE;
+                minRep = (minRep == 0)? minRep : minRep -1
+            } else {
+                yOffset += (minRep + 2) * UI.TEXTSIZE;
+                minRep = 2;
+            }
+            
+            if (yOffset + scrollOffset < 0) {
+                continue;
+            } else if (yOffset + scrollOffset < CANVAS_SIZE.y) {
+
+                if (!isSameUser) {
+                image(
+                    IMG[UI.PFP[save.msg[selectedUser][i][0]]],
+                    CANVAS_SIZE.x/8 + UI.BUFF,
+                    scrollOffset + yOffset, 
+                    CANVAS_SIZE.x/8 - UI.BUFF *2,
+                    CANVAS_SIZE.x/8 - UI.BUFF *2,
+                )
+                fill(UI.VLIGHT_COLOR); text(
+                    save.msg[selectedUser][i][0], 
+                    CANVAS_SIZE.x/4, 
+                    scrollOffset + yOffset + UI.TEXTSIZE, 
+                ); yOffset += UI.TEXTSIZE * 1.25}
+
+                fill(UI.LIGHT_COLOR); text(
+                    save.msg[selectedUser][i][1], 
+                    CANVAS_SIZE.x/4, 
+                    scrollOffset + yOffset + UI.TEXTSIZE,
+                );
+            } else {
+                break;
+            }
+        }
+
 
 
         // RUNNING THE GAME
         
         if (currentLineTyped == currentLine) {
             if (keyJustTyped == "*return") {
-                currentLineNum += 1;
-                currentLine = currentSlice[currentLineNum];
+                // take the currently typed line and throw it into the savedata
+                save.msg[selectedUser].push(currentSlice[currentLineNum]);
+                // move to the next line
+                currentLineNum++;
+                currentLine = currentSlice[currentLineNum][1];
                 currentLineTyped = "";
             }
         } else {
@@ -86,6 +138,6 @@ class scenePlay {
 function runSlice(in_str) {
     currentSlice = S[in_str];
     currentLineNum = 0; 
-    currentLine = currentSlice[currentLineNum];
+    currentLine = currentSlice[currentLineNum][1];
     currentLineTyped = "";
 }

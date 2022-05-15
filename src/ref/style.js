@@ -11,4 +11,13 @@ const UI = {
     BUFF: CANVAS_SIZE.x/60,
     TEXTSIZE: CANVAS_SIZE.x/40,
 
+    PFP: {
+        "Shrek": "pfp1.png",
+        "Onion": "pfp2.png",
+    }
 };
+
+IMG_LIST = [
+    "pfp1.png", 
+    "pfp2.png",
+]
