@@ -1,5 +1,5 @@
 // VAR DECLARATION
-let selectedUser = ""; selectedUser = "testUser"
+let selectedUser = ""; selectedUser = "Onion"
 let currentSlice = [];
 let currentLineNum = 0; let currentLine = "..."; let currentLineTyped = "";
 let typeTick = 0; // referenced for the | thing.
@@ -20,6 +20,11 @@ class scenePlay {
         background(UI.DARK_COLOR);
         noStroke();
         textFont("Arial");// textFont(FONT); // font change later pls.
+
+        // making sure the selected user is in save
+        if (!(selectedUser in save["msg"])) {
+            save["msg"][selectedUser] = [];
+        }
 
         // SCREEN ITEMS
 
@@ -58,6 +63,7 @@ class scenePlay {
             CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
         )
+
 
         let yOffset = 0;
         let minRep = 2; // offset by at least 2 lines between users (bc of PFP)
