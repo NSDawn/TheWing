@@ -1,5 +1,7 @@
 // VAR DECLARATION
-let currentLine = "Peepeepoopoo eeeeee"; let currentLineTyped = "Peepeepo";
+let currentSlice = [];
+let currentLineNum = 0; let currentLine = "..."; let currentLineTyped = "";
+let typeTick = 0; // referenced for the | thing.
 
 // SCENE (scenePlay)
 class scenePlay {
@@ -8,13 +10,14 @@ class scenePlay {
         return;
     }
     sceneInit() { // runs once when this scene is switched to
+        runSlice("testA");
         return;
     }
     sceneDraw() { // runs once per ∆t
         // settings
         background(UI.DARK_COLOR);
         noStroke();
-        textFont(FONT);
+        textFont("Arial");// textFont(FONT);
 
         // SCREEN ITEMS
 
@@ -46,13 +49,43 @@ class scenePlay {
             CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
         )
+        
+        typeTick = (typeTick != 60) ? typeTick + 1 : 0; // tick the ticker
         fill(UI.DARK_COLOR); textSize(UI.TEXTSIZE); text(
-            currentLineTyped,
+            currentLineTyped + ((typeTick > 30) ? "|" : ""),
             CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
         )
 
+
+
+        // RUNNING THE GAME
+        
+        if (currentLineTyped == currentLine) {
+            if (keyJustTyped == "*return") {
+                currentLineNum += 1;
+                currentLine = currentSlice[currentLineNum];
+                currentLineTyped = "";
+            }
+        } else {
+            let nextChar = currentLine[currentLineTyped.length]; 
+            const skippedChar = `"'.,?`;
+            if (skippedChar.includes(nextChar)) {
+                currentLineTyped += nextChar;
+            } else if (keyJustTyped == nextChar) {
+                currentLineTyped += nextChar;
+                typeTick = 31;
+            }
+        }
+        
         return;
         
     }
+}
+
+function runSlice(in_str) {
+    currentSlice = S[in_str];
+    currentLineNum = 0; 
+    currentLine = currentSlice[currentLineNum];
+    currentLineTyped = "";
 }

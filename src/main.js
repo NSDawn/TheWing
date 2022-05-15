@@ -9,7 +9,6 @@
 
 */
 
-
 // //// //// //// //// //// //// //
 // SCENE HANDLING                //
 // //// //// //// //// //// //// //
@@ -49,6 +48,8 @@ function draw() {
     
     // see KEY HANDLING
     keyJustTyped = "";
+
+
 }
 
 function changeScene(sceneKey) {
@@ -56,7 +57,7 @@ function changeScene(sceneKey) {
         throw ("changeScene: Scene <" + sceneKey + "> does not exist.");
     }
     currentScene = sceneKey;
-    flagHasRunInit = true;
+    flagHasRunInit = false;
     return;
 }
 
@@ -67,6 +68,13 @@ function changeScene(sceneKey) {
 let keyJustTyped = "" // this is set to "" at the end of each frame
 
 function keyTyped() {
-    keyJustTyped = key;
+    if (!keyJustTyped.includes("*")) { // filters functional keys out
+        keyJustTyped = key;
+    }    
 }
 
+function keyPressed() {
+    if (keyCode == "ENTER" || keyCode == "RETURN" || keyCode == "13") {
+        keyJustTyped = "*return"
+    }
+}
