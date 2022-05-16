@@ -9,6 +9,7 @@ let scrollOffset = 0; let maxScroll = 0;
 class scenePlay {
     constructor() { }
     scenePreload() { // runs once before EVERYTHING else
+         this.bonk = new Audio('./assets/bonk-sound-effect.mp3');
         return;
     }
     sceneInit() { // runs once when this scene is switched to
@@ -118,6 +119,7 @@ class scenePlay {
         
         if (currentLineTyped == currentLine) {
             if (keyJustTyped == "*return") {
+                this.bonk.play();
                 // take the currently typed line and throw it into the savedata
                 save.msg[selectedUser].push(currentSlice[currentLineNum]);
                 // move to the next line
