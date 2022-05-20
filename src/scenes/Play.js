@@ -13,7 +13,7 @@ class scenePlay {
         return;
     }
     sceneInit() { // runs once when this scene is switched to
-        runSlice("testA");
+        runSlice("testB");
         return;
     }
     sceneDraw() { // runs once per ∆t
@@ -36,6 +36,54 @@ class scenePlay {
             CANVAS_SIZE.x / 8, 
             CANVAS_SIZE.y
         ); 
+        
+        // putting the texts on the scrolling center screen
+        let yOffset = 0;
+        let minRep = 2; // offset by at least 2 lines between users (bc of PFP)
+        for (let i = 0; i < save.msg[selectedUser].length; i++) {
+            
+            let isSameUser = false
+            if (i != 0) {
+                if (save.msg[selectedUser][i][0] == save.msg[selectedUser][i - 1][0]) {
+                    isSameUser = true;
+                }
+            }
+
+            if (isSameUser) {
+                yOffset += UI.TEXTSIZE;
+                minRep = (minRep == 0)? minRep : minRep -1
+            } else {
+                yOffset += (minRep + 2) * UI.TEXTSIZE;
+                minRep = 2;
+            }
+            
+            if (yOffset + scrollOffset < 0) {
+                continue;
+            } else if (yOffset + scrollOffset < 9 * CANVAS_SIZE.y / 8) {
+
+                if (!isSameUser) {
+                image(
+                    IMG[UI.PFP[save.msg[selectedUser][i][0]]],
+                    CANVAS_SIZE.x/8 + UI.BUFF,
+                    scrollOffset + yOffset, 
+                    CANVAS_SIZE.x/8 - UI.BUFF *2,
+                    CANVAS_SIZE.x/8 - UI.BUFF *2,
+                )
+                fill(UI.VLIGHT_COLOR); text(
+                    save.msg[selectedUser][i][0], 
+                    CANVAS_SIZE.x/4, 
+                    scrollOffset + yOffset + UI.TEXTSIZE, 
+                ); yOffset += UI.TEXTSIZE * 1.25}
+
+                fill(UI.LIGHT_COLOR); text(
+                    save.msg[selectedUser][i][1], 
+                    CANVAS_SIZE.x/4, 
+                    scrollOffset + yOffset + UI.TEXTSIZE,
+                );
+            } else {
+                break;
+            }
+        }
 
         // bottom bar
         fill(UI.LIGHT_COLOR); rect(
@@ -66,58 +114,12 @@ class scenePlay {
         )
 
 
-        let yOffset = 0;
-        let minRep = 2; // offset by at least 2 lines between users (bc of PFP)
-        for (let i = 0; i < save.msg[selectedUser].length; i++) {
-            
-            let isSameUser = false
-            if (i != 0) {
-                if (save.msg[selectedUser][i][0] == save.msg[selectedUser][i - 1][0]) {
-                    isSameUser = true;
-                }
-            }
-
-            if (isSameUser) {
-                yOffset += UI.TEXTSIZE;
-                minRep = (minRep == 0)? minRep : minRep -1
-            } else {
-                yOffset += (minRep + 2) * UI.TEXTSIZE;
-                minRep = 2;
-            }
-            
-            if (yOffset + scrollOffset < 0) {
-                continue;
-            } else if (yOffset + scrollOffset < CANVAS_SIZE.y) {
-
-                if (!isSameUser) {
-                image(
-                    IMG[UI.PFP[save.msg[selectedUser][i][0]]],
-                    CANVAS_SIZE.x/8 + UI.BUFF,
-                    scrollOffset + yOffset, 
-                    CANVAS_SIZE.x/8 - UI.BUFF *2,
-                    CANVAS_SIZE.x/8 - UI.BUFF *2,
-                )
-                fill(UI.VLIGHT_COLOR); text(
-                    save.msg[selectedUser][i][0], 
-                    CANVAS_SIZE.x/4, 
-                    scrollOffset + yOffset + UI.TEXTSIZE, 
-                ); yOffset += UI.TEXTSIZE * 1.25}
-
-                fill(UI.LIGHT_COLOR); text(
-                    save.msg[selectedUser][i][1], 
-                    CANVAS_SIZE.x/4, 
-                    scrollOffset + yOffset + UI.TEXTSIZE,
-                );
-            } else {
-                break;
-            }
-        }
-
-
 
         // RUNNING THE GAME
         
-        if (currentLineTyped == currentLine) {
+        if (keyJustTyped == "*delete" && currentLineTyped != "") {
+            currentLineTyped = currentLineTyped.substring(0, currentLineTyped.length -1);
+        } else if (currentLineTyped == currentLine) {
             if (keyJustTyped == "*return") {
                 this.bonk.play();
                 // take the currently typed line and throw it into the savedata
@@ -137,6 +139,16 @@ class scenePlay {
                 typeTick = 31;
             }
         }
+        
+        // scrolling
+        maxScroll = -yOffset + 6 * CANVAS_SIZE.y/8;
+        if (mouseScroll < 0) {
+            scrollOffset = Math.max(scrollOffset + mouseScroll, maxScroll);
+        } else if (mouseScroll > 0) {
+            scrollOffset = Math.min(scrollOffset + mouseScroll, 0);
+        }
+
+        mouseScroll = 0;
         
         return;
         

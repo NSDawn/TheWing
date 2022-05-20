@@ -79,6 +79,20 @@ function keyTyped() {
 
 function keyPressed() {
     if (keyCode == "ENTER" || keyCode == "RETURN" || keyCode == "13") {
-        keyJustTyped = "*return"
+        keyJustTyped = "*return";
     }
+    if (keyCode == "DELETE" || keyCode == "8") {
+        keyJustTyped = "*delete";
+    }
+}
+
+let mouseScroll = 0;
+function mouseWheel(event) {
+    mouseScroll = event.delta / SETTINGS.SENSITIVITY * (SETTINGS.SCROLL_INVERT? -1 : 1);
+    
+    /* // this would handle scrolling on the screen vs. scrolling on the whole page, but google chrome doesn't like this.
+    if ((mouseX <= CANVAS_SIZE.x) && (mouseX >= 0) && (mouseY <= CANVAS_SIZE.y) && (mouseY >= 0)) {
+        return false;
+    }
+    */
 }
