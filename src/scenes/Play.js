@@ -68,7 +68,7 @@ class scenePlay {
                     scrollOffset + yOffset, 
                     CANVAS_SIZE.x/8 - UI.BUFF *2,
                     CANVAS_SIZE.x/8 - UI.BUFF *2,
-                )
+                );
                 fill(UI.VLIGHT_COLOR); text(
                     save.msg[selectedUser][i][0], 
                     CANVAS_SIZE.x/4, 
@@ -85,12 +85,32 @@ class scenePlay {
             }
         }
 
+        // top bar
+        fill(UI.LIGHT_COLOR); rect(
+            CANVAS_SIZE.x/8,
+            0,
+            CANVAS_SIZE.x,
+            CANVAS_SIZE.y/8,
+        )
+        // name tag
+        fill(UI.VLIGHT_COLOR); textSize(UI.TEXTSIZE); text(
+            selectedUser,
+            3 * CANVAS_SIZE.x/16 + 2 * UI.BUFF,
+            CANVAS_SIZE.y / 16 + UI.TEXTSIZE /2,
+        );
+        image(
+            IMG[UI.PFP[selectedUser]],
+            CANVAS_SIZE.x / 8 + UI.BUFF,
+            CANVAS_SIZE.y / 16 - CANVAS_SIZE.x/16 / 2,
+            CANVAS_SIZE.x/16,
+            CANVAS_SIZE.x/16,
+        );
         // bottom bar
         fill(UI.LIGHT_COLOR); rect(
             CANVAS_SIZE.x / 8, 
             7 * CANVAS_SIZE.y / 8, 
             7* CANVAS_SIZE.x /8, 
-            CANVAS_SIZE.y / 8
+            CANVAS_SIZE.y / 8,
         );
         // textbox
         fill(UI.VLIGHT_COLOR); rect(
@@ -104,14 +124,14 @@ class scenePlay {
             currentLine,
             CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
-        )
+        );
         
         typeTick = (typeTick != 60) ? typeTick + 1 : 0; // tick the ticker
         fill(UI.DARK_COLOR); textSize(UI.TEXTSIZE); text(
             currentLineTyped + ((typeTick > 30) ? "|" : ""),
             CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
-        )
+        );
 
 
 
@@ -141,7 +161,7 @@ class scenePlay {
         }
         
         // scrolling
-        maxScroll = -yOffset + 6 * CANVAS_SIZE.y/8;
+        maxScroll = yOffset > 6 * CANVAS_SIZE.y/8 ? -yOffset + 6 * CANVAS_SIZE.y/8 : 0;
         if (mouseScroll < 0) {
             scrollOffset = Math.max(scrollOffset + mouseScroll, maxScroll);
         } else if (mouseScroll > 0) {
