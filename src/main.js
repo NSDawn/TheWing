@@ -66,7 +66,7 @@ function changeScene(sceneKey) {
 }
 
 // //// //// //// //// //// //// //
-// KEY HANDLING                  //
+// INPUT HANDLING                //
 // //// //// //// //// //// //// //
 
 let keyJustTyped = "" // this is set to "" at the end of each frame

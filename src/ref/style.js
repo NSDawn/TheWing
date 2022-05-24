@@ -14,10 +14,14 @@ const UI = {
     PFP: {
         "Shrek": "pfp1.png",
         "Onion": "pfp2.png",
+        "Nagito": "pfp3.png",
     }
 };
 
 IMG_LIST = [
     "pfp1.png", 
     "pfp2.png",
+    "pfp3.png",
+
+    "mascot.png"
 ]

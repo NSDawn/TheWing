@@ -4,6 +4,7 @@ let currentSlice = [];
 let currentLineNum = 0; let currentLine = "..."; let currentLineTyped = "";
 let typeTick = 0; // referenced for the | thing.
 let scrollOffset = 0; let maxScroll = 0;
+let sentMessage = false;
 
 // SCENE (scenePlay)
 class scenePlay {
@@ -13,7 +14,7 @@ class scenePlay {
         return;
     }
     sceneInit() { // runs once when this scene is switched to
-        runSlice("testB");
+        runSlice("testC");
         return;
     }
     sceneDraw() { // runs once per ∆t
@@ -28,14 +29,6 @@ class scenePlay {
         }
 
         // SCREEN ITEMS
-
-        // left sidebar
-        fill(UI.VDARK_COLOR); rect(
-            0, 
-            0, 
-            CANVAS_SIZE.x / 8, 
-            CANVAS_SIZE.y
-        ); 
         
         // putting the texts on the scrolling center screen
         let yOffset = 0;
@@ -57,7 +50,7 @@ class scenePlay {
                 minRep = 2;
             }
             
-            if (yOffset + scrollOffset < 0) {
+            if (yOffset + scrollOffset < -CANVAS_SIZE / 8) {
                 continue;
             } else if (yOffset + scrollOffset < 9 * CANVAS_SIZE.y / 8) {
 
@@ -133,10 +126,35 @@ class scenePlay {
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
         );
 
+        // left bar 
+        // left sidebar
+        fill(UI.VDARK_COLOR); rect(
+            0, 
+            0, 
+            CANVAS_SIZE.x / 8, 
+            CANVAS_SIZE.y,
+        ); 
+        // mascot
+        image(
+            IMG["mascot.png"],
+            CANVAS_SIZE.x / 64,
+            CANVAS_SIZE.x / 64,
+            3 * CANVAS_SIZE.x / 32,
+            3 * CANVAS_SIZE.x / 32,
+        );
+        // left side, scrolling users
+
 
 
         // RUNNING THE GAME
+
+        // autoscroll down to the next message if one was sent last frame
+        if (sentMessage) {
+            scrollOffset = maxScroll;
+            sentMessage = false;
+        }
         
+        // handling different key inputs
         if (keyJustTyped == "*delete" && currentLineTyped != "") {
             currentLineTyped = currentLineTyped.substring(0, currentLineTyped.length -1);
         } else if (currentLineTyped == currentLine) {
@@ -148,6 +166,8 @@ class scenePlay {
                 currentLineNum++;
                 currentLine = currentSlice[currentLineNum][1];
                 currentLineTyped = "";
+                // note that a message was sent, so autoscroll happens
+                sentMessage = true;
             }
         } else {
             let nextChar = currentLine[currentLineTyped.length]; 
@@ -167,11 +187,9 @@ class scenePlay {
         } else if (mouseScroll > 0) {
             scrollOffset = Math.min(scrollOffset + mouseScroll, 0);
         }
-
         mouseScroll = 0;
-        
+
         return;
-        
     }
 }
 
