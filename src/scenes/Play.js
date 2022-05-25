@@ -70,6 +70,11 @@ class scenePlay {
                     (save.msg[selectedUser][i][0] == "*p") ? SETTINGS.PLAYER_NAME : save.msg[selectedUser][i][0], 
                     CANVAS_SIZE.x/4, 
                     scrollOffset + yOffset + UI.TEXTSIZE, 
+                );
+                fill(UI.LIGHT_COLOR); text(
+                    translateTime(save.msg[selectedUser][i][3]),
+                    3 * CANVAS_SIZE.x/4,
+                    scrollOffset + yOffset + UI.TEXTSIZE,        
                 ); yOffset += UI.TEXTSIZE * 1.25}
 
                 fill(UI.LIGHT_COLOR); text(
@@ -154,15 +159,6 @@ class scenePlay {
 
         // RUNNING THE GAME
 
-        // autoscroll down to the next message if one was sent last frame
-        if (sentMessage) {
-            scrollOffset = maxScroll;
-            sentMessage = false;
-        }
-        
-        
-    
-        
         // IF IT'S THE PLAYER'S TURN allow them to type responses
         if (currentLine[selectedUser][0] == "*p") {
             // handling different key inputs
@@ -171,6 +167,7 @@ class scenePlay {
             } else if (currentLineTyped[selectedUser] == currentLine[selectedUser][1]) {
                 if (keyJustTyped == "*return") {
                     // take the currently typed line and throw it into the savedata
+                    currentSlice[selectedUser][currentLineNum[selectedUser]][3] = Date.now();
                     save.msg[selectedUser].push(currentSlice[selectedUser][currentLineNum[selectedUser]]);
                     // move to the next line
                     currentLineNum[selectedUser]++;
@@ -199,13 +196,15 @@ class scenePlay {
                 } else {
                     this.bonk.play();
                     // take the line just sent and throw it into the savedata
+                    currentSlice[availableUsers[i]][currentLineNum[availableUsers[i]]][3] = Date.now();
                     save.msg[availableUsers[i]].push(currentSlice[availableUsers[i]][currentLineNum[availableUsers[i]]]);
                     // move to the next line
                     currentLineNum[availableUsers[i]]++;
                     currentLine[availableUsers[i]] = currentSlice[availableUsers[i]][currentLineNum[availableUsers[i]]];
                     currentLineTyped[availableUsers[i]] = "";
                     // note that a message was sent, so autoscroll happens IF the screen is open to it.
-                    sentMessage = (availableUsers[i] == selectedUser);
+                    
+                    sentMessage = (availableUsers[i] == selectedUser)? true : sentMessage;
                 }
             }
         }
@@ -218,6 +217,12 @@ class scenePlay {
             scrollOffset = Math.min(scrollOffset + mouseScroll, 0);
         }
         mouseScroll = 0;
+
+        // autoscroll down to the next message if one was sent last frame
+        if (sentMessage) {
+            scrollOffset = maxScroll;
+            sentMessage = false;
+        }
 
         return;
     }

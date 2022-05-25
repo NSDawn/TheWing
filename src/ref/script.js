@@ -38,7 +38,7 @@ let S = {
         ["Onion", "until 2010.", 40],
         ["Onion", "Its close relatives include garlic,", 240],
         ["*p", "scallion,", 0],
-        ["Onion", "leek,", 60],
+        ["Onion", "leek,", 120],
         ["Nagito", "and chive.", 60],
         ["Onion", "w h a t", 100],
         ["*p", "last text", 0],

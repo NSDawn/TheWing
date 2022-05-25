@@ -96,3 +96,7 @@ function mouseWheel(event) {
     }
     */
 }
+
+function translateTime(in_int) {
+    return ("utc+" + String(in_int));
+}
