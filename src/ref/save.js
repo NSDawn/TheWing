@@ -8,4 +8,6 @@ let save = {
 let SETTINGS = {
     SENSITIVITY : 10,
     SCROLL_INVERT: false,
+    
+    PLAYER_NAME: "Shrek",
 }

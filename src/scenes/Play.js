@@ -1,7 +1,11 @@
 // VAR DECLARATION
-let selectedUser = ""; selectedUser = "Onion"
-let currentSlice = [];
-let currentLineNum = 0; let currentLine = "..."; let currentLineTyped = "";
+let selectedUser = ""; selectedUser = "Onion";
+
+let availableUsers = ["Onion",]; 
+
+let currentSlice = {"Onion":[]};
+let currentLineNum = {"Onion": 0}; let currentLine = {"Onion": []}; let currentLineTyped = {"Onion":""};
+
 let typeTick = 0; // referenced for the | thing.
 let scrollOffset = 0; let maxScroll = 0;
 let sentMessage = false;
@@ -14,7 +18,7 @@ class scenePlay {
         return;
     }
     sceneInit() { // runs once when this scene is switched to
-        runSlice("testC");
+        runSlice("testC", "Onion");
         return;
     }
     sceneDraw() { // runs once per ∆t
@@ -63,7 +67,7 @@ class scenePlay {
                     CANVAS_SIZE.x/8 - UI.BUFF *2,
                 );
                 fill(UI.VLIGHT_COLOR); text(
-                    save.msg[selectedUser][i][0], 
+                    (save.msg[selectedUser][i][0] == "*p") ? SETTINGS.PLAYER_NAME : save.msg[selectedUser][i][0], 
                     CANVAS_SIZE.x/4, 
                     scrollOffset + yOffset + UI.TEXTSIZE, 
                 ); yOffset += UI.TEXTSIZE * 1.25}
@@ -113,15 +117,17 @@ class scenePlay {
             CANVAS_SIZE.y / 8 - 2*UI.BUFF,
             CANVAS_SIZE.y / 16,             // rounded corners
         );
-        fill(UI.LIGHT_COLOR); textSize(UI.TEXTSIZE); text(
-            currentLine,
-            CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
-            7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
-        );
+        if (currentLine[selectedUser][0] == "*p") {
+            fill(UI.LIGHT_COLOR); textSize(UI.TEXTSIZE); text(
+                currentLine[selectedUser][1],
+                CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
+                7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
+            );
+        }
         
         typeTick = (typeTick != 60) ? typeTick + 1 : 0; // tick the ticker
         fill(UI.DARK_COLOR); textSize(UI.TEXTSIZE); text(
-            currentLineTyped + ((typeTick > 30) ? "|" : ""),
+            currentLineTyped[selectedUser] + ((typeTick > 30) ? "|" : ""),
             CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
         );
@@ -154,32 +160,56 @@ class scenePlay {
             sentMessage = false;
         }
         
-        // handling different key inputs
-        if (keyJustTyped == "*delete" && currentLineTyped != "") {
-            currentLineTyped = currentLineTyped.substring(0, currentLineTyped.length -1);
-        } else if (currentLineTyped == currentLine) {
-            if (keyJustTyped == "*return") {
-                this.bonk.play();
-                // take the currently typed line and throw it into the savedata
-                save.msg[selectedUser].push(currentSlice[currentLineNum]);
-                // move to the next line
-                currentLineNum++;
-                currentLine = currentSlice[currentLineNum][1];
-                currentLineTyped = "";
-                // note that a message was sent, so autoscroll happens
-                sentMessage = true;
-            }
-        } else {
-            let nextChar = currentLine[currentLineTyped.length]; 
-            const skippedChar = `"'.,?`;
-            if (skippedChar.includes(nextChar)) {
-                currentLineTyped += nextChar;
-            } else if (keyJustTyped == nextChar) {
-                currentLineTyped += nextChar;
-                typeTick = 31;
+        
+    
+        
+        // IF IT'S THE PLAYER'S TURN allow them to type responses
+        if (currentLine[selectedUser][0] == "*p") {
+            // handling different key inputs
+            if (keyJustTyped == "*delete" && currentLineTyped[selectedUser] != "") {
+                currentLineTyped[selectedUser] = currentLineTyped[selectedUser].substring(0, currentLineTyped[selectedUser].length -1);
+            } else if (currentLineTyped[selectedUser] == currentLine[selectedUser][1]) {
+                if (keyJustTyped == "*return") {
+                    // take the currently typed line and throw it into the savedata
+                    save.msg[selectedUser].push(currentSlice[selectedUser][currentLineNum[selectedUser]]);
+                    // move to the next line
+                    currentLineNum[selectedUser]++;
+                    currentLine[selectedUser] = currentSlice[selectedUser][currentLineNum[selectedUser]];
+                    currentLineTyped[selectedUser] = "";
+                    // note that a message was sent, so autoscroll happens
+                    sentMessage = true;
+                }
+            } else {
+                let nextChar = currentLine[selectedUser][1][currentLineTyped[selectedUser].length]; 
+                const skippedChar = `"'.,?`;
+                if (skippedChar.includes(nextChar)) {
+                    currentLineTyped[selectedUser] += nextChar;
+                } else if (keyJustTyped == nextChar) {
+                    currentLineTyped[selectedUser] += nextChar;
+                    typeTick = 31;
+                }
             }
         }
-        
+
+        // tick everyone's clocks, and send messages when necessary
+        for (let i = 0; i < availableUsers.length; i++) {
+            if (currentLine[availableUsers[i]][0] != "*p") {
+                if (currentLine[availableUsers[i]][2]) {
+                    currentLine[availableUsers[i]][2] -= 1;
+                } else {
+                    this.bonk.play();
+                    // take the line just sent and throw it into the savedata
+                    save.msg[availableUsers[i]].push(currentSlice[availableUsers[i]][currentLineNum[availableUsers[i]]]);
+                    // move to the next line
+                    currentLineNum[availableUsers[i]]++;
+                    currentLine[availableUsers[i]] = currentSlice[availableUsers[i]][currentLineNum[availableUsers[i]]];
+                    currentLineTyped[availableUsers[i]] = "";
+                    // note that a message was sent, so autoscroll happens IF the screen is open to it.
+                    sentMessage = (availableUsers[i] == selectedUser);
+                }
+            }
+        }
+
         // scrolling
         maxScroll = yOffset > 6 * CANVAS_SIZE.y/8 ? -yOffset + 6 * CANVAS_SIZE.y/8 : 0;
         if (mouseScroll < 0) {
@@ -193,9 +223,9 @@ class scenePlay {
     }
 }
 
-function runSlice(in_str) {
-    currentSlice = S[in_str];
-    currentLineNum = 0; 
-    currentLine = currentSlice[currentLineNum][1];
-    currentLineTyped = "";
+function runSlice(in_str, in_user) {
+    currentSlice[in_user] = S[in_str];
+    currentLineNum[in_user] = 0; 
+    currentLine[in_user] = currentSlice[in_user][currentLineNum[in_user]];
+    currentLineTyped[in_user] = "";
 }

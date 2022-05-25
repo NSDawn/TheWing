@@ -12,7 +12,7 @@ const UI = {
     TEXTSIZE: CANVAS_SIZE.x/40,
 
     PFP: {
-        "Shrek": "pfp1.png",
+        "*p": "pfp1.png",
         "Onion": "pfp2.png",
         "Nagito": "pfp3.png",
     }
@@ -23,5 +23,5 @@ IMG_LIST = [
     "pfp2.png",
     "pfp3.png",
 
-    "mascot.png"
+    "mascot.png",
 ]
