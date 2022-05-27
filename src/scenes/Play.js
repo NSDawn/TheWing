@@ -1,14 +1,15 @@
 // VAR DECLARATION
-let selectedUser = ""; selectedUser = "Onion";
+let selectedUser = ""; selectedUser = "Nagito";
 
-let availableUsers = ["Onion",]; 
+let availableUsers = []; 
 
-let currentSlice = {"Onion":[]};
-let currentLineNum = {"Onion": 0}; let currentLine = {"Onion": []}; let currentLineTyped = {"Onion":""};
+let currentSlice = {};
+let currentLineNum = {}; let currentLine = {}; let currentLineTyped = {};
 
 let typeTick = 0; // referenced for the | thing.
 let scrollOffset = 0; let maxScroll = 0;
-let sentMessage = false;
+let scrollOffsetUsers = 0; let maxScrollUsers = 0;
+let autoScrollDown = false;
 
 // SCENE (scenePlay)
 class scenePlay {
@@ -17,8 +18,9 @@ class scenePlay {
          this.bonk = new Audio('./assets/bonk-sound-effect.mp3');
         return;
     }
-    sceneInit() { // runs once when this scene is switched to
+    sceneInit() { // runs once when this scene is switched to  
         runSlice("testC", "Onion");
+        runSlice("testD", "Nagito");
         return;
     }
     sceneDraw() { // runs once per ∆t
@@ -154,6 +156,39 @@ class scenePlay {
             3 * CANVAS_SIZE.x / 32,
         );
         // left side, scrolling users
+        let yOffsetUsers = CANVAS_SIZE.x / 8;
+        let mousePos = new v2(mouseX, mouseY);
+        for (let i = 0; i < availableUsers.length; i++) {
+            if (yOffsetUsers + scrollOffsetUsers < CANVAS_SIZE.y / 8) {
+                yOffsetUsers += 3 * CANVAS_SIZE.x / 32;
+            } else if (yOffsetUsers + scrollOffsetUsers < CANVAS_SIZE.y) {
+                
+                // check if mouse is on a particular user, and note a buff in size if it is
+                let isMouseOn = mousePos.isWithin(new v2(CANVAS_SIZE.x / 32, scrollOffsetUsers + yOffsetUsers), new v2(CANVAS_SIZE.x / 32 + CANVAS_SIZE.x/16, scrollOffsetUsers + yOffsetUsers + CANVAS_SIZE.x/16));
+                let hoverBuff = isMouseOn? CANVAS_SIZE.x / 128 : 0;
+
+                // check if mouse is clicking on this particuar user
+                if (mouseJustClicked && isMouseOn) {
+                    selectedUser = availableUsers[i];
+                    autoScrollDown = true;
+                }
+
+                // render user
+                image(
+                    IMG[UI.PFP[availableUsers[i]]],
+                    CANVAS_SIZE.x / 32 -hoverBuff/2,
+                    scrollOffsetUsers + yOffsetUsers -hoverBuff/2, 
+                    CANVAS_SIZE.x / 16 +hoverBuff,
+                    CANVAS_SIZE.x / 16 +hoverBuff,
+                );
+                yOffsetUsers += 3 * CANVAS_SIZE.x / 32;
+            } else {
+                break;
+            }
+        }
+
+        
+
 
 
 
@@ -174,7 +209,7 @@ class scenePlay {
                     currentLine[selectedUser] = currentSlice[selectedUser][currentLineNum[selectedUser]];
                     currentLineTyped[selectedUser] = "";
                     // note that a message was sent, so autoscroll happens
-                    sentMessage = true;
+                    autoScrollDown = true;
                 }
             } else {
                 let nextChar = currentLine[selectedUser][1][currentLineTyped[selectedUser].length]; 
@@ -184,6 +219,8 @@ class scenePlay {
                 } else if (keyJustTyped == nextChar) {
                     currentLineTyped[selectedUser] += nextChar;
                     typeTick = 31;
+                } else if (keyJustTyped == "*skip") { // debugging, delete after testing is done!!
+                    currentLineTyped[selectedUser] = currentLine[selectedUser][1];
                 }
             }
         }
@@ -204,24 +241,29 @@ class scenePlay {
                     currentLineTyped[availableUsers[i]] = "";
                     // note that a message was sent, so autoscroll happens IF the screen is open to it.
                     
-                    sentMessage = (availableUsers[i] == selectedUser)? true : sentMessage;
+                    autoScrollDown = (availableUsers[i] == selectedUser)? true : autoScrollDown;
                 }
             }
         }
 
         // scrolling
         maxScroll = yOffset > 6 * CANVAS_SIZE.y/8 ? -yOffset + 6 * CANVAS_SIZE.y/8 : 0;
+        
+        /*
+        if (save.msg[selectedUser].length > 1 && maxScroll < 0) { // janky little bugfix
+            let lastMessageIndex = save.msg[selectedUser].length - 1;
+            maxScroll -= (save.msg[selectedUser][lastMessageIndex][0] != save.msg[selectedUser][lastMessageIndex - 1][0]? CANVAS_SIZE.x/2 - UI.BUFF*2: 0);
+        }*/
         if (mouseScroll < 0) {
             scrollOffset = Math.max(scrollOffset + mouseScroll, maxScroll);
         } else if (mouseScroll > 0) {
             scrollOffset = Math.min(scrollOffset + mouseScroll, 0);
         }
-        mouseScroll = 0;
 
         // autoscroll down to the next message if one was sent last frame
-        if (sentMessage) {
+        if (autoScrollDown) {
             scrollOffset = maxScroll;
-            sentMessage = false;
+            autoScrollDown = false;
         }
 
         return;
@@ -229,8 +271,20 @@ class scenePlay {
 }
 
 function runSlice(in_str, in_user) {
+    if (!(in_user in availableUsers)) {
+        addUser(in_user);
+    }
     currentSlice[in_user] = S[in_str];
     currentLineNum[in_user] = 0; 
     currentLine[in_user] = currentSlice[in_user][currentLineNum[in_user]];
     currentLineTyped[in_user] = "";
+}
+
+function addUser(in_user) {
+    availableUsers.splice(1, 0, in_user);
+    currentSlice[in_user] = [];
+    currentLineNum[in_user] = 0; 
+    currentLine[in_user] = []; 
+    currentLineTyped[in_user] = ""; 
+    save.msg[in_user] = [];
 }

@@ -52,6 +52,8 @@ function draw() {
     
     // see KEY HANDLING
     keyJustTyped = "";
+    mouseScroll = 0;
+    mouseJustClicked = false;
 
 
 }
@@ -78,12 +80,17 @@ function keyTyped() {
 }
 
 function keyPressed() {
+    //console.log(keyCode);
     if (keyCode == "ENTER" || keyCode == "RETURN" || keyCode == "13") {
         keyJustTyped = "*return";
     }
     if (keyCode == "DELETE" || keyCode == "8") {
         keyJustTyped = "*delete";
     }
+    if (keyCode == "CMD" || keyCode == "91") {
+        keyJustTyped = "*skip";
+    }
+    
 }
 
 let mouseScroll = 0;
@@ -97,6 +104,12 @@ function mouseWheel(event) {
     */
 }
 
+let mouseJustClicked = false;
+function mouseClicked() {
+    mouseJustClicked = true;
+}
+
+// function that parses time to the format we wanna print. i'm passing unix epoch time through it btw
 function translateTime(in_int) {
     return ("utc+" + String(in_int));
 }
