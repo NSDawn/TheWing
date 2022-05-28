@@ -1,10 +1,11 @@
 // VAR DECLARATION
-let selectedUser = ""; selectedUser = "Nagito";
+let selectedUser = ""; selectedUser = "Onion";
 
 let availableUsers = []; 
 
 let currentSlice = {};
-let currentLineNum = {}; let currentLine = {}; let currentLineTyped = {};
+let currentLineNum = {}; let currentLine = {}; let currentLineTyped = {}; 
+let currentChoice = {}; let currentSelectedChoice = {};
 
 let typeTick = 0; // referenced for the | thing.
 let scrollOffset = 0; let maxScroll = 0;
@@ -19,7 +20,7 @@ class scenePlay {
         return;
     }
     sceneInit() { // runs once when this scene is switched to  
-        runSlice("testC", "Onion");
+        runSlice("testChoice", "Onion");
         runSlice("testD", "Nagito");
         return;
     }
@@ -74,7 +75,7 @@ class scenePlay {
                     scrollOffset + yOffset + UI.TEXTSIZE, 
                 );
                 fill(UI.LIGHT_COLOR); text(
-                    translateTime(save.msg[selectedUser][i][3]),
+                    translateTime(save.msg[selectedUser][i][2]),
                     3 * CANVAS_SIZE.x/4,
                     scrollOffset + yOffset + UI.TEXTSIZE,        
                 ); yOffset += UI.TEXTSIZE * 1.25}
@@ -126,18 +127,17 @@ class scenePlay {
         );
         if (currentLine[selectedUser][0] == "*p") {
             fill(UI.LIGHT_COLOR); textSize(UI.TEXTSIZE); text(
-                currentLine[selectedUser][1],
+                currentLine[selectedUser][1] + currentChoice[selectedUser],
+                CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
+                7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
+            );
+            typeTick = (typeTick != 60) ? typeTick + 1 : 0; // tick the ticker
+            fill(UI.DARK_COLOR); textSize(UI.TEXTSIZE); text(
+                currentLineTyped[selectedUser] + ((typeTick > 30) ? "|" : ""),
                 CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
                 7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
             );
         }
-        
-        typeTick = (typeTick != 60) ? typeTick + 1 : 0; // tick the ticker
-        fill(UI.DARK_COLOR); textSize(UI.TEXTSIZE); text(
-            currentLineTyped[selectedUser] + ((typeTick > 30) ? "|" : ""),
-            CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
-            7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
-        );
         
         // left bar 
         // left sidebar
@@ -197,45 +197,69 @@ class scenePlay {
             3 * CANVAS_SIZE.x / 32,
         );
 
-        
-
-
-
 
         // RUNNING THE GAME
 
         // IF IT'S THE PLAYER'S TURN allow them to type responses
-        console.log(save.flag);
         if (currentLine[selectedUser][0] == "*p") {
             // handling different key inputs
             if (keyJustTyped == "*delete" && currentLineTyped[selectedUser] != "") {
                 currentLineTyped[selectedUser] = currentLineTyped[selectedUser].substring(0, currentLineTyped[selectedUser].length -1);
-            } else if (currentLineTyped[selectedUser] == currentLine[selectedUser][1]) {
+            } else if (currentLineTyped[selectedUser] == currentLine[selectedUser][1] + currentChoice[selectedUser]) {
                 if (keyJustTyped == "*return") {
                     // save flags, if any
-                    if (currentLine[selectedUser][3]) {
+                    if (currentLine[selectedUser][4]) {
+                        save["flag"][currentLine[selectedUser][3]] = currentSelectedChoice[selectedUser];
+                    } else if (currentLine[selectedUser][3]) {
                         save["flag"][currentLine[selectedUser][3]] = 1;
                     }
                     // take the currently typed line and throw it into the savedata
-                    currentSlice[selectedUser][currentLineNum[selectedUser]][3] = Date.now();
+                    currentSlice[selectedUser][currentLineNum[selectedUser]][2] = Date.now();
+                    currentSlice[selectedUser][currentLineNum[selectedUser]][1] += currentChoice[selectedUser];
                     save.msg[selectedUser].push(currentSlice[selectedUser][currentLineNum[selectedUser]]);
                     // move to the next line
                     currentLineNum[selectedUser]++;
                     currentLine[selectedUser] = currentSlice[selectedUser][currentLineNum[selectedUser]];
                     currentLineTyped[selectedUser] = "";
+
+                    currentChoice[selectedUser] = "";
+                    if (currentLine[selectedUser][4]) {
+                        currentChoice[selectedUser] = "[" + currentLine[selectedUser][4] + "]";
+                    }
+
                     // note that a message was sent, so autoscroll happens
                     autoScrollDown = true;
                 }
             } else {
-                let nextChar = currentLine[selectedUser][1][currentLineTyped[selectedUser].length]; 
+                let nextChar = (currentLine[selectedUser][1] + currentChoice[selectedUser])[currentLineTyped[selectedUser].length]; 
+                // also allow the user to type in multiple options, based on choice
+                let selectChars = "";
+                if (currentChoice[selectedUser].includes("|") && currentLineTyped[selectedUser] == currentLine[selectedUser][1]) {
+                    let choices = currentChoice[selectedUser].replace("[", "").replace("]", "").split("|");
+                    for (let i = 0; i < choices.length; i++) {
+                        selectChars += choices[i][0];
+                    }
+                }
                 const skippedChar = `"'.,?`;
                 if (skippedChar.includes(nextChar)) {
                     currentLineTyped[selectedUser] += nextChar;
-                } else if (keyJustTyped == nextChar) {
-                    currentLineTyped[selectedUser] += nextChar;
+                } else if (keyJustTyped == nextChar && nextChar != "[") {
+                    currentLineTyped[selectedUser] += keyJustTyped;
                     typeTick = 31;
+                } else if (selectChars.includes(keyJustTyped) && !(keyJustTyped == "")) {
+                    currentLineTyped[selectedUser] += keyJustTyped;
+                    currentSelectedChoice[selectedUser] = selectChars.indexOf(keyJustTyped);
+                    currentChoice[selectedUser] = currentChoice[selectedUser].replace("[", "").replace("]", "").split("|")[currentSelectedChoice[selectedUser]];
+
                 } else if (keyJustTyped == "*skip") { // debugging, delete after testing is done!!
                     currentLineTyped[selectedUser] = currentLine[selectedUser][1];
+                }
+                
+                if (currentLineTyped[selectedUser].length <= currentLine[selectedUser][1].length) {
+                    if (currentLine[selectedUser][4]) {
+                        currentChoice[selectedUser] = "[" + currentLine[selectedUser][4] + "]";
+                        currentSelectedChoice[selectedUser] = -1;
+                    }
                 }
             }
         }
@@ -250,12 +274,16 @@ class scenePlay {
                     this.bonk.play();
                     userSent = availableUsers[i];
                     // take the line just sent and throw it into the savedata
-                    currentSlice[userSent][currentLineNum[userSent]][3] = Date.now();
+                    currentSlice[userSent][currentLineNum[userSent]][2] = Date.now();
                     save.msg[userSent].push(currentSlice[userSent][currentLineNum[userSent]]);
                     // move to the next line
                     currentLineNum[userSent]++;
                     currentLine[userSent] = currentSlice[userSent][currentLineNum[userSent]];
                     currentLineTyped[userSent] = "";
+                    currentChoice[userSent] = "";
+                    if (currentLine[userSent][4]) {
+                        currentChoice[userSent] = "[" + currentLine[userSent][4] + "]";
+                    }
                     // note that a message was sent, so autoscroll happens IF the screen is open to it.
                     autoScrollDown = (userSent == selectedUser)? true : autoScrollDown;
 
@@ -310,6 +338,10 @@ function runSlice(in_str, in_user) {
     currentLineNum[in_user] = 0; 
     currentLine[in_user] = currentSlice[in_user][currentLineNum[in_user]];
     currentLineTyped[in_user] = "";
+    currentChoice[in_user] = "";
+    if (currentLine[in_user][4]) {
+        currentChoice[in_user] = "[" + currentLine[selectedUser][4] + "]";
+    }
 }
 
 function addUser(in_user) {

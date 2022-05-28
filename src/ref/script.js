@@ -60,6 +60,13 @@ let S = {
         ["Nagito", "what ARE YOU SAYINGGGG", 120],
         ["*p", "last text", 0],
     ],
+    "testChoice" : [
+        ["Onion", "what is ur name?", 120],
+        ["*p", "im ", 0, "testChoiceFlag", "Shrek|Donkey|Farquaad"],
+        ["Onion", "woah that's so poggers!", 600], 
+        ["Onion", "a nice name.", 90],
+        ["*p", "last text", 0],
+    ],
     "momMorningOne":[
         ["Mom","Hi Honey! Are you ready for your first day of work?"],
         ["Player","I'm [nervous/anxious/worried]"],
