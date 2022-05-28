@@ -9,7 +9,7 @@ let currentLineNum = {}; let currentLine = {}; let currentLineTyped = {};
 let typeTick = 0; // referenced for the | thing.
 let scrollOffset = 0; let maxScroll = 0;
 let scrollOffsetUsers = 0; let maxScrollUsers = 0;
-let autoScrollDown = false;
+let autoScrollDown = false; let autoScrollDownTick = false;
 
 // SCENE (scenePlay)
 class scenePlay {
@@ -138,7 +138,7 @@ class scenePlay {
             CANVAS_SIZE.x / 8 + UI.BUFF + UI.TEXTSIZE, 
             7 * CANVAS_SIZE.y / 8 + 1.5*UI.BUFF + UI.TEXTSIZE,
         );
-
+        
         // left bar 
         // left sidebar
         fill(UI.VDARK_COLOR); rect(
@@ -147,19 +147,11 @@ class scenePlay {
             CANVAS_SIZE.x / 8, 
             CANVAS_SIZE.y,
         ); 
-        // mascot
-        image(
-            IMG["mascot.png"],
-            CANVAS_SIZE.x / 64,
-            CANVAS_SIZE.x / 64,
-            3 * CANVAS_SIZE.x / 32,
-            3 * CANVAS_SIZE.x / 32,
-        );
         // left side, scrolling users
         let yOffsetUsers = CANVAS_SIZE.x / 8;
         let mousePos = new v2(mouseX, mouseY);
         for (let i = 0; i < availableUsers.length; i++) {
-            if (yOffsetUsers + scrollOffsetUsers < CANVAS_SIZE.y / 8) {
+            if (yOffsetUsers + scrollOffsetUsers < CANVAS_SIZE.y / 16) {
                 yOffsetUsers += 3 * CANVAS_SIZE.x / 32;
             } else if (yOffsetUsers + scrollOffsetUsers < CANVAS_SIZE.y) {
                 
@@ -182,10 +174,28 @@ class scenePlay {
                     CANVAS_SIZE.x / 16 +hoverBuff,
                 );
                 yOffsetUsers += 3 * CANVAS_SIZE.x / 32;
+
+                // draw a thing on the side if its the selected user
+                if (availableUsers[i] == selectedUser) {
+                    fill(UI.VLIGHT_COLOR); ellipse(
+                        0,
+                        scrollOffsetUsers + yOffsetUsers - CANVAS_SIZE.x / 16, 
+                        CANVAS_SIZE.x/64,
+                    )
+                }
+                    
             } else {
                 break;
             }
         }
+        // mascot
+        image(
+            IMG["mascot.png"],
+            CANVAS_SIZE.x / 64,
+            CANVAS_SIZE.x / 64,
+            3 * CANVAS_SIZE.x / 32,
+            3 * CANVAS_SIZE.x / 32,
+        );
 
         
 
@@ -195,12 +205,17 @@ class scenePlay {
         // RUNNING THE GAME
 
         // IF IT'S THE PLAYER'S TURN allow them to type responses
+        console.log(save.flag);
         if (currentLine[selectedUser][0] == "*p") {
             // handling different key inputs
             if (keyJustTyped == "*delete" && currentLineTyped[selectedUser] != "") {
                 currentLineTyped[selectedUser] = currentLineTyped[selectedUser].substring(0, currentLineTyped[selectedUser].length -1);
             } else if (currentLineTyped[selectedUser] == currentLine[selectedUser][1]) {
                 if (keyJustTyped == "*return") {
+                    // save flags, if any
+                    if (currentLine[selectedUser][3]) {
+                        save["flag"][currentLine[selectedUser][3]] = 1;
+                    }
                     // take the currently typed line and throw it into the savedata
                     currentSlice[selectedUser][currentLineNum[selectedUser]][3] = Date.now();
                     save.msg[selectedUser].push(currentSlice[selectedUser][currentLineNum[selectedUser]]);
@@ -226,46 +241,63 @@ class scenePlay {
         }
 
         // tick everyone's clocks, and send messages when necessary
+        let userSent = false;
         for (let i = 0; i < availableUsers.length; i++) {
             if (currentLine[availableUsers[i]][0] != "*p") {
                 if (currentLine[availableUsers[i]][2]) {
                     currentLine[availableUsers[i]][2] -= 1;
                 } else {
                     this.bonk.play();
+                    userSent = availableUsers[i];
                     // take the line just sent and throw it into the savedata
-                    currentSlice[availableUsers[i]][currentLineNum[availableUsers[i]]][3] = Date.now();
-                    save.msg[availableUsers[i]].push(currentSlice[availableUsers[i]][currentLineNum[availableUsers[i]]]);
+                    currentSlice[userSent][currentLineNum[userSent]][3] = Date.now();
+                    save.msg[userSent].push(currentSlice[userSent][currentLineNum[userSent]]);
                     // move to the next line
-                    currentLineNum[availableUsers[i]]++;
-                    currentLine[availableUsers[i]] = currentSlice[availableUsers[i]][currentLineNum[availableUsers[i]]];
-                    currentLineTyped[availableUsers[i]] = "";
+                    currentLineNum[userSent]++;
+                    currentLine[userSent] = currentSlice[userSent][currentLineNum[userSent]];
+                    currentLineTyped[userSent] = "";
                     // note that a message was sent, so autoscroll happens IF the screen is open to it.
-                    
-                    autoScrollDown = (availableUsers[i] == selectedUser)? true : autoScrollDown;
+                    autoScrollDown = (userSent == selectedUser)? true : autoScrollDown;
+
                 }
             }
+        }
+        // if a user sent a message, move it to the top of availableUsers
+        if (userSent) {
+            availableUsers = removeFromArray(availableUsers, userSent);
+            availableUsers.unshift(userSent);
         }
 
         // scrolling
         maxScroll = yOffset > 6 * CANVAS_SIZE.y/8 ? -yOffset + 6 * CANVAS_SIZE.y/8 : 0;
+        maxScrollUsers = yOffsetUsers > 6 * CANVAS_SIZE.y/8 ? -yOffsetUsers + 6 * CANVAS_SIZE.y/8 : 0;
         
-        /*
-        if (save.msg[selectedUser].length > 1 && maxScroll < 0) { // janky little bugfix
-            let lastMessageIndex = save.msg[selectedUser].length - 1;
-            maxScroll -= (save.msg[selectedUser][lastMessageIndex][0] != save.msg[selectedUser][lastMessageIndex - 1][0]? CANVAS_SIZE.x/2 - UI.BUFF*2: 0);
-        }*/
-        if (mouseScroll < 0) {
-            scrollOffset = Math.max(scrollOffset + mouseScroll, maxScroll);
-        } else if (mouseScroll > 0) {
-            scrollOffset = Math.min(scrollOffset + mouseScroll, 0);
+        if (mousePos.isWithin(new v2(CANVAS_SIZE.x/8, CANVAS_SIZE.y/8), new v2(CANVAS_SIZE.x, 7* CANVAS_SIZE.y/8))) {
+            if (mouseScroll < 0) {
+                scrollOffset = Math.max(scrollOffset + mouseScroll, maxScroll);
+            } else if (mouseScroll > 0) {
+                scrollOffset = Math.min(scrollOffset + mouseScroll, 0);
+            }
+        } else if (mousePos.isWithin(new v2(0, CANVAS_SIZE.y/8), new v2(CANVAS_SIZE.x/8, CANVAS_SIZE.y))) {
+            if (mouseScroll < 0) {
+                scrollOffsetUsers = Math.max(scrollOffsetUsers + mouseScroll, maxScrollUsers);
+            } else if (mouseScroll > 0) {
+                scrollOffsetUsers = Math.min(scrollOffsetUsers + mouseScroll, 0);
+            }
         }
+        
+        
 
         // autoscroll down to the next message if one was sent last frame
         if (autoScrollDown) {
-            scrollOffset = maxScroll;
-            autoScrollDown = false;
+            if (!autoScrollDownTick) {
+                autoScrollDownTick = true;
+            } else {
+                scrollOffset = maxScroll;
+                autoScrollDown = false;
+                autoScrollDownTick = false;
+            }
         }
-
         return;
     }
 }

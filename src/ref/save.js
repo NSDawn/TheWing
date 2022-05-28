@@ -2,7 +2,10 @@ let save = {
     "msg": {
         "testUser" : [
         ]
-    }
+    },
+    "flag": {
+        "testFlag" : 0,
+    },
 }
 
 let SETTINGS = {
