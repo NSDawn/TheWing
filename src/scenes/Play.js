@@ -6,15 +6,16 @@ let availableUsers = [];
 let currentSlice = {};
 let currentLineNum = {}; let currentLine = {}; let currentLineTyped = {}; 
 let currentChoice = {}; let currentSelectedChoice = {};
+let notif = {};
 
 let typeTick = 0; // referenced for the | thing.
 let scrollOffset = 0; let maxScroll = 0;
 let scrollOffsetUsers = 0; let maxScrollUsers = 0;
-let autoScrollDown = false; let autoScrollDownTick = false;
+let autoScrollDown = false; let autoScrollDownTick = 2;
 
 // SCENE (scenePlay)
 class scenePlay {
-    constructor() { }
+    constructor() {};
     scenePreload() { // runs once before EVERYTHING else
          this.bonk = new Audio('./assets/bonk-sound-effect.mp3');
         return;
@@ -86,7 +87,7 @@ class scenePlay {
                     scrollOffset + yOffset + UI.TEXTSIZE,
                 );
             } else {
-                break;
+                continue;
             }
         }
 
@@ -183,7 +184,21 @@ class scenePlay {
                         CANVAS_SIZE.x/64,
                     )
                 }
-                    
+                
+                // draw a bubble if there are notifs
+                if (notif[availableUsers[i]] > 0) {
+                    fill(UI.NOTIF_COLOR); ellipse(
+                        CANVAS_SIZE.x / 32 -hoverBuff/2,
+                        scrollOffsetUsers + yOffsetUsers - CANVAS_SIZE.x / 16 -hoverBuff/2,
+                        CANVAS_SIZE.x/32,
+                    )
+                    fill(UI.VLIGHT_COLOR); text(
+                        String(notif[availableUsers[i]]),
+                        CANVAS_SIZE.x / 32 -hoverBuff/2 -5*UI.TEXTSIZE/16,
+                        scrollOffsetUsers + yOffsetUsers - CANVAS_SIZE.x / 16 -hoverBuff/2 +6*UI.TEXTSIZE/16,
+                    )
+                }
+
             } else {
                 break;
             }
@@ -286,6 +301,8 @@ class scenePlay {
                     }
                     // note that a message was sent, so autoscroll happens IF the screen is open to it.
                     autoScrollDown = (userSent == selectedUser)? true : autoScrollDown;
+                    // if the screen is not open to it, send a notif
+                    notif[userSent] += (userSent == selectedUser)? 0 : 1;
 
                 }
             }
@@ -318,27 +335,36 @@ class scenePlay {
 
         // autoscroll down to the next message if one was sent last frame
         if (autoScrollDown) {
-            if (!autoScrollDownTick) {
-                autoScrollDownTick = true;
+            if (autoScrollDownTick > 0) {
+                autoScrollDownTick -= 1;
             } else {
                 scrollOffset = maxScroll;
                 autoScrollDown = false;
-                autoScrollDownTick = false;
+                autoScrollDownTick = 2;
             }
         }
+        
+        // clear notifs for selectedUser
+        notif[selectedUser] = 0;
+        
+        updateStory(); // run storyboard.js
         return;
+
     }
 }
 
 function runSlice(in_str, in_user) {
-    if (!(in_user in availableUsers)) {
+    if (!(availableUsers.includes(in_user))) {
         addUser(in_user);
     }
     currentSlice[in_user] = S[in_str];
     currentLineNum[in_user] = 0; 
     currentLine[in_user] = currentSlice[in_user][currentLineNum[in_user]];
     currentLineTyped[in_user] = "";
+    
+    
     currentChoice[in_user] = "";
+    currentSelectedChoice[in_user] = -1;
     if (currentLine[in_user][4]) {
         currentChoice[in_user] = "[" + currentLine[selectedUser][4] + "]";
     }
@@ -351,4 +377,5 @@ function addUser(in_user) {
     currentLine[in_user] = []; 
     currentLineTyped[in_user] = ""; 
     save.msg[in_user] = [];
+    notif[in_user] = 0;
 }

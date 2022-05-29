@@ -1,4 +1,5 @@
 let save = {
+    "tick": 0,
     "msg": {
         "testUser" : [
         ]
